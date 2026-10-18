@@ -1,0 +1,15 @@
+[package]
+name = "paceline"
+version = "0.1.0"
+edition = "2024"
+description = "A launch gate for AI agents on a Claude Code subscription: spend the weekly limit on pace, never hit the 5-hour cap."
+license = "MIT"
+repository = "https://github.com/mackenziebowes/paceline"
+readme = "README.md"
+keywords = ["claude", "claude-code", "rate-limit", "agents", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
