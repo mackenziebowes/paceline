@@ -27,8 +27,10 @@ It saves each reading and prints `5h 12% · 7d 40% · Opus 5.5`. If you already 
 
 ## Use
 
+An example after a few hours of readings, with three agents running:
+
 ```text
-$ paceline gate
+$ paceline gate --agents 3
 LAUNCH
 week 58% used, pace line 62.3% (69% of the week gone, target 90%, resets Tue 11:00)
 5h 1% (cap 70%, resets Sun 11:40)
