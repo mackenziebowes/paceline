@@ -188,8 +188,11 @@ fn parse_gate(args: &[String]) -> Result<GateArgs, String> {
             other => return Err(format!("unknown option '{other}'. Run `paceline help` for the options.")),
         }
     }
-    if t.week_pct == 0.0 {
-        return Err("--week must be above 0: it is the share of the weekly limit to spend.".into());
+    if t.week_pct == 0.0 || t.week_pct > 100.0 {
+        return Err(format!("--week must be above 0 and at most 100: it is the percent of the weekly limit to spend, got {}.", t.week_pct));
+    }
+    if t.five_hour_cap_pct > 100.0 {
+        return Err(format!("--max5h must be at most 100: it is a percent of the 5-hour limit, got {}.", t.five_hour_cap_pct));
     }
     Ok(GateArgs { targets: t, agents, json })
 }
@@ -199,8 +202,21 @@ fn running(src: &AgentsSource) -> Option<u32> {
         AgentsSource::None => None,
         AgentsSource::Fixed(n) => Some(*n),
         AgentsSource::Command(cmd) => {
-            let out = std::process::Command::new("sh").arg("-c").arg(cmd).output().ok()?;
-            String::from_utf8_lossy(&out.stdout).trim().parse().ok()
+            let out = match std::process::Command::new("sh").arg("-c").arg(cmd).output() {
+                Ok(out) => out,
+                Err(e) => {
+                    eprintln!("paceline gate: --agents-cmd could not run ({e}); the agents line is left out.");
+                    return None;
+                }
+            };
+            let text = String::from_utf8_lossy(&out.stdout);
+            match text.trim().parse() {
+                Ok(n) => Some(n),
+                Err(_) => {
+                    eprintln!("paceline gate: --agents-cmd {} printed '{}', not a whole number{}; the agents line is left out.", cmd, text.trim().chars().take(40).collect::<String>(), if out.status.success() { "" } else { " (it also exited non-zero)" });
+                    None
+                }
+            }
         }
     }
 }
